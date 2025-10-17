@@ -1,0 +1,605 @@
+openapi: 3.0.3
+info:
+  title: Jules API
+  version: v1alpha
+  description: |
+    OpenAPI definition for the Jules API REST surface, converted from the Google
+    Developers reference as of 2025-10-07.
+servers:
+  - url: https://jules.googleapis.com
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: sessions
+    description: Operations for managing Jules sessions.
+  - name: sessionActivities
+    description: Operations for reading activities generated within a session.
+  - name: sources
+    description: Operations for managing data sources used by Jules.
+paths:
+  /v1alpha/sessions:
+    get:
+      tags:
+        - sessions
+      summary: List sessions
+      description: Lists all sessions.
+      operationId: listSessions
+      parameters:
+        - name: pageSize
+          in: query
+          description: The number of sessions to return (defaults to 30; maximum 100).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: pageToken
+          in: query
+          description: A page token received from a previous `sessions.list` call.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A page of sessions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSessionsResponse'
+    post:
+      tags:
+        - sessions
+      summary: Create session
+      description: Creates a new session.
+      operationId: createSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Session'
+      responses:
+        '200':
+          description: The newly created session.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+  /v1alpha/sessions/{session}:
+    get:
+      tags:
+        - sessions
+      summary: Get session
+      description: Gets a single session.
+      operationId: getSession
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: The requested session.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+  /v1alpha/sessions/{session}:approvePlan:
+    post:
+      tags:
+        - sessions
+      summary: Approve plan
+      description: Approves a plan in a session.
+      operationId: approveSessionPlan
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Plan approved.
+  /v1alpha/sessions/{session}:sendMessage:
+    post:
+      tags:
+        - sessions
+      summary: Send message
+      description: Sends a message from the user to a session.
+      operationId: sendSessionMessage
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prompt
+              properties:
+                prompt:
+                  type: string
+                  description: The user prompt to send to the session.
+      responses:
+        '200':
+          description: Message accepted.
+  /v1alpha/sessions/{session}/activities:
+    get:
+      tags:
+        - sessionActivities
+      summary: List activities
+      description: Lists activities for a session.
+      operationId: listSessionActivities
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - name: pageSize
+          in: query
+          description: The number of activities to return (defaults to 50; maximum 100).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: pageToken
+          in: query
+          description: A page token received from a previous `sessions.activities.list` call.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A page of session activities.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListActivitiesResponse'
+  /v1alpha/sessions/{session}/activities/{activity}:
+    get:
+      tags:
+        - sessionActivities
+      summary: Get activity
+      description: Gets a single activity.
+      operationId: getSessionActivity
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+        - $ref: '#/components/parameters/ActivityId'
+      responses:
+        '200':
+          description: The requested activity.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+  /v1alpha/sources:
+    get:
+      tags:
+        - sources
+      summary: List sources
+      description: Lists sources.
+      operationId: listSources
+      parameters:
+        - name: filter
+          in: query
+          description: |
+            Filter expression for listing sources (AIP-160). Currently only supports
+            filtering by name, separated by `OR`.
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          description: The number of sources to return (defaults to 30; maximum 100).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+        - name: pageToken
+          in: query
+          description: A page token received from a previous `sources.list` call.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A page of sources.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListSourcesResponse'
+  /v1alpha/sources/{source}:
+    get:
+      tags:
+        - sources
+      summary: Get source
+      description: Gets a single source.
+      operationId: getSource
+      parameters:
+        - $ref: '#/components/parameters/SourceId'
+      responses:
+        '200':
+          description: The requested source.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Goog-Api-Key
+      description: API key required in the `X-Goog-Api-Key` header.
+  parameters:
+    SessionId:
+      name: session
+      in: path
+      required: true
+      description: "Resource identifier of the session. Format: `sessions/{session}`."
+      schema:
+        type: string
+    ActivityId:
+      name: activity
+      in: path
+      required: true
+      description: Activity identifier within the session.
+      schema:
+        type: string
+    SourceId:
+      name: source
+      in: path
+      required: true
+      description: "Resource identifier of the source. Format: `sources/{source}`."
+      schema:
+        type: string
+  schemas:
+    Session:
+      type: object
+      required:
+        - prompt
+        - sourceContext
+      properties:
+        name:
+          type: string
+          readOnly: true
+          description: Full resource name (e.g., `sessions/{session}`).
+        id:
+          type: string
+          readOnly: true
+          description: Output-only session identifier.
+        prompt:
+          type: string
+          description: Initial prompt that starts the session.
+        sourceContext:
+          $ref: '#/components/schemas/SourceContext'
+        title:
+          type: string
+          description: Optional session title; generated if omitted.
+        requirePlanApproval:
+          type: boolean
+          description: |
+            If true, plans generated by the agent require explicit approval before work
+            begins. Defaults to auto-approval.
+          writeOnly: true
+        automationMode:
+          $ref: '#/components/schemas/AutomationMode'
+          writeOnly: true
+        createTime:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Time the session was created.
+        updateTime:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Time the session was last updated.
+        state:
+          $ref: '#/components/schemas/SessionState'
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+          description: URL to view the session in the Jules web app.
+        outputs:
+          type: array
+          readOnly: true
+          description: Outputs of the session, if any.
+          items:
+            $ref: '#/components/schemas/SessionOutput'
+    SourceContext:
+      type: object
+      required:
+        - source
+      properties:
+        source:
+          type: string
+          description: "Name of the source used in the session. Format: `sources/{source}`."
+        githubRepoContext:
+          $ref: '#/components/schemas/GitHubRepoContext'
+          description: Context for using a GitHub repository in the session.
+    GitHubRepoContext:
+      type: object
+      required:
+        - startingBranch
+      properties:
+        startingBranch:
+          type: string
+          description: Branch name to start the session from.
+    AutomationMode:
+      type: string
+      description: Automation mode of the session.
+      enum:
+        - AUTOMATION_MODE_UNSPECIFIED
+        - AUTO_CREATE_PR
+    SessionState:
+      type: string
+      description: Current state of the session.
+      enum:
+        - STATE_UNSPECIFIED
+        - QUEUED
+        - PLANNING
+        - AWAITING_PLAN_APPROVAL
+        - AWAITING_USER_FEEDBACK
+        - IN_PROGRESS
+        - PAUSED
+        - FAILED
+        - COMPLETED
+    SessionOutput:
+      type: object
+      description: Output of a session.
+      properties:
+        pullRequest:
+          $ref: '#/components/schemas/PullRequest'
+      additionalProperties: false
+    PullRequest:
+      type: object
+      description: Pull request created by the session.
+      properties:
+        url:
+          type: string
+          format: uri
+          description: URL of the pull request.
+        title:
+          type: string
+          description: Title of the pull request.
+        description:
+          type: string
+          description: Description of the pull request.
+    ListSessionsResponse:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Session'
+          description: Sessions that match the request.
+        nextPageToken:
+          type: string
+          description: Token to retrieve the next page of results.
+    Activity:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Full resource name (e.g., `sessions/{session}/activities/{activity}`).
+        id:
+          type: string
+          readOnly: true
+          description: Output-only activity identifier.
+        description:
+          type: string
+          readOnly: true
+          description: Human-readable description of the activity.
+        createTime:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Time when the activity was created.
+        originator:
+          type: string
+          description: Entity that originated the activity (for example `user` or `agent`).
+        artifacts:
+          type: array
+          readOnly: true
+          description: Artifacts produced by the activity.
+          items:
+            $ref: '#/components/schemas/Artifact'
+        agentMessaged:
+          $ref: '#/components/schemas/AgentMessaged'
+        userMessaged:
+          $ref: '#/components/schemas/UserMessaged'
+        planGenerated:
+          $ref: '#/components/schemas/PlanGenerated'
+        planApproved:
+          $ref: '#/components/schemas/PlanApproved'
+        progressUpdated:
+          $ref: '#/components/schemas/ProgressUpdated'
+        sessionCompleted:
+          $ref: '#/components/schemas/SessionCompleted'
+        sessionFailed:
+          $ref: '#/components/schemas/SessionFailed'
+      additionalProperties: false
+    AgentMessaged:
+      type: object
+      properties:
+        agentMessage:
+          type: string
+          description: Message posted by the agent.
+    UserMessaged:
+      type: object
+      properties:
+        userMessage:
+          type: string
+          description: Message posted by the user.
+    PlanGenerated:
+      type: object
+      properties:
+        plan:
+          $ref: '#/components/schemas/Plan'
+          description: Plan that was generated.
+    Plan:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Identifier for the plan, unique within the session.
+        steps:
+          type: array
+          readOnly: true
+          description: Steps that make up the plan.
+          items:
+            $ref: '#/components/schemas/PlanStep'
+        createTime:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Time when the plan was created.
+    PlanStep:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          description: Identifier for the step, unique within the plan.
+        title:
+          type: string
+          readOnly: true
+          description: Title of the plan step.
+        description:
+          type: string
+          readOnly: true
+          description: Description of the plan step.
+        index:
+          type: integer
+          readOnly: true
+          description: Zero-based position within the plan steps.
+    PlanApproved:
+      type: object
+      properties:
+        planId:
+          type: string
+          description: Identifier of the approved plan.
+    ProgressUpdated:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the progress update.
+        description:
+          type: string
+          description: Description of the progress update.
+    SessionCompleted:
+      type: object
+      description: Marker that the session completed successfully.
+      additionalProperties: false
+    SessionFailed:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason the session failed.
+    Artifact:
+      type: object
+      description: Artifact produced by an activity.
+      properties:
+        changeSet:
+          $ref: '#/components/schemas/ChangeSet'
+        media:
+          $ref: '#/components/schemas/Media'
+        bashOutput:
+          $ref: '#/components/schemas/BashOutput'
+      additionalProperties: false
+    ChangeSet:
+      type: object
+      properties:
+        source:
+          type: string
+          description: Name of the source this change set applies to.
+        gitPatch:
+          $ref: '#/components/schemas/GitPatch'
+      additionalProperties: false
+    GitPatch:
+      type: object
+      properties:
+        unidiffPatch:
+          type: string
+          description: Patch data in unified diff format.
+        baseCommitId:
+          type: string
+          description: Base commit identifier for the patch.
+        suggestedCommitMessage:
+          type: string
+          description: Suggested commit message for the patch.
+    Media:
+      type: object
+      properties:
+        data:
+          type: string
+          format: byte
+          description: Base64-encoded media data.
+        mimeType:
+          type: string
+          description: MIME type of the media.
+    BashOutput:
+      type: object
+      properties:
+        command:
+          type: string
+          description: Executed bash command.
+        output:
+          type: string
+          description: Combined standard output and error.
+        exitCode:
+          type: integer
+          description: Exit code from the command.
+    ListActivitiesResponse:
+      type: object
+      properties:
+        activities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Activity'
+          description: Activities from the specified session.
+        nextPageToken:
+          type: string
+          description: Token to retrieve the next page of results.
+    Source:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Full resource name (e.g., `sources/{source}`).
+        id:
+          type: string
+          readOnly: true
+          description: Output-only source identifier.
+        githubRepo:
+          $ref: '#/components/schemas/GitHubRepo'
+      additionalProperties: false
+    GitHubRepo:
+      type: object
+      properties:
+        owner:
+          type: string
+          description: GitHub repository owner.
+        repo:
+          type: string
+          description: GitHub repository name.
+        isPrivate:
+          type: boolean
+          description: Indicates whether the repository is private.
+        defaultBranch:
+          $ref: '#/components/schemas/GitHubBranch'
+          description: Default branch for the repository.
+        branches:
+          type: array
+          description: Active branches for the repository.
+          items:
+            $ref: '#/components/schemas/GitHubBranch'
+    GitHubBranch:
+      type: object
+      properties:
+        displayName:
+          type: string
+          description: Name of the GitHub branch.
+    ListSourcesResponse:
+      type: object
+      properties:
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/Source'
+          description: Sources that match the request.
+        nextPageToken:
+          type: string
+          description: Token to retrieve the next page of results.

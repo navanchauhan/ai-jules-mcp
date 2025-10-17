@@ -1,0 +1,16 @@
+[project]
+name = "ai-jules-mcp"
+version = "0.1.0"
+description = "Jules MCP via OpenAPI Spec"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=2.12.4",
+    "httpx>=0.28.1",
+]
+
+[tool.uv]
+package = true
+
+[tool.uv.scripts]
+"google-jules-mcp" = "python main.py"
