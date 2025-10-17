@@ -10,10 +10,10 @@ dependencies = [
 ]
 
 [project.scripts]
-"google-jules-mcp" = "main:main"
+"google-jules-mcp" = "ai_jules_mcp.cli:main"
+
+[tool.setuptools.package-data]
+"ai_jules_mcp" = ["openapi.json"]
 
 [tool.uv]
 package = true
-
-[tool.uv.scripts]
-"google-jules-mcp" = "python main.py"

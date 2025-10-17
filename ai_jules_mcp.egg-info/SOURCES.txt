@@ -1,6 +1,9 @@
 README.md
 main.py
 pyproject.toml
+ai_jules_mcp/__init__.py
+ai_jules_mcp/cli.py
+ai_jules_mcp/openapi.json
 ai_jules_mcp.egg-info/PKG-INFO
 ai_jules_mcp.egg-info/SOURCES.txt
 ai_jules_mcp.egg-info/dependency_links.txt

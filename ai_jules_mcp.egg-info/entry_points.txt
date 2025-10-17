@@ -1,2 +1,2 @@
 [console_scripts]
-google-jules-mcp = main:main
+google-jules-mcp = ai_jules_mcp.cli:main
