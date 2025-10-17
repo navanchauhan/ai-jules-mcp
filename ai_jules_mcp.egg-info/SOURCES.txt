@@ -1,0 +1,9 @@
+README.md
+main.py
+pyproject.toml
+ai_jules_mcp.egg-info/PKG-INFO
+ai_jules_mcp.egg-info/SOURCES.txt
+ai_jules_mcp.egg-info/dependency_links.txt
+ai_jules_mcp.egg-info/entry_points.txt
+ai_jules_mcp.egg-info/requires.txt
+ai_jules_mcp.egg-info/top_level.txt

@@ -9,6 +9,9 @@ dependencies = [
     "httpx>=0.28.1",
 ]
 
+[project.scripts]
+"google-jules-mcp" = "main:main"
+
 [tool.uv]
 package = true
 
